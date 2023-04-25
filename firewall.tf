@@ -10,7 +10,7 @@ resource "azurerm_firewall_network_rule_collection" "this" {
   rule {
     name = "postgresql"
 
-    source_addresses = ["0.0.0.0"]
+    source_addresses = ["${each.value.source_subnet}"]
     destination_ports = local.service_ports
     destination_addresses = local.service_ip_addresses
     protocols = ["TCP"]
