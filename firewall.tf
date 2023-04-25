@@ -1,32 +1,18 @@
-data "azurerm_resource_group" "this" {
-  name = element(local.rg_name, 0)
-}
-
-data "azurerm_firewall" "this" {
-  name                = element(local.firewall_name, 0)
-  resource_group_name = data.azurerm_resource_group.this.name
-}
-
 resource "azurerm_firewall_network_rule_collection" "this" {
-  name                = element(local.service_name, 0)
-  azure_firewall_name = data.azurerm_firewall.this.name
-  resource_group_name = data.azurerm_resource_group.this.name
+  for_each = local.meta_attributes
+
+  name                = each.value.deployment_id
+  azure_firewall_name = "${each.value.landing_zone_id}-hub-canberra-afw"
+  resource_group_name = "${each.value.landing_zone_id}-hub-canberra-rg"
   priority            = 100
   action              = "Allow"
 
   rule {
-    name = "https"
+    name = "postgresql"
 
-    source_addresses = local.service_ip_addresses
-
+    source_addresses = ["0.0.0.0"]
     destination_ports = local.service_ports
-
-    destination_addresses = [
-      "0.0.0.0",
-    ]
-
-    protocols = [
-      "TCP",
-    ]
+    destination_addresses = local.service_ip_addresses
+    protocols = ["TCP"]
   }
 }

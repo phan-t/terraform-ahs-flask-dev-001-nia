@@ -25,31 +25,13 @@ variable "services" {
 }
 
 locals {
-  service_name = [
-    for name, attributes in var.services : attributes.name
-  ]
-  service_ip_addresses = [
-    for ip, attributes in var.services : attributes.address
-  ]
-  service_ports = [
-    for port, attributes in var.services : attributes.port
-  ]
-  rg_name = [
-    for name, attributes in var.services : attributes.meta.azure_rg_name
-  ]
-  firewall_name = [
-    for name, attributes in var.services : attributes.meta.azure_firewall_name
-  ]
-}
+  service_name         = [for name, attributes in var.services : attributes.name]
+  service_ip_addresses = [for ip, attributes in var.services : attributes.address]
+  service_ports        = [for port, attributes in var.services : attributes.port]
 
-variable "rg_name" {
-  description = "Resource group name"
-  type        = string
-  default     = ""
-}
-
-variable "firewall_name" {
-  description = "Firewall name"
-  type        = string
-  default     = ""
+  meta_attributes = {
+    for name, attributes in {
+      for id, service in var.services : service.name => service.meta...
+    } : name => merge(attributes...)
+  }
 }
